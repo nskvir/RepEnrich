@@ -215,62 +215,62 @@ file counts.csv contains the ouput from RepEnrich that was made by
 pasting the individual \*\_fraction\_counts.txt files together for my
 complete experiment. 
 
-## Example Script for EdgeR differential enrichment analysis<br>
-    # EdgeR example<br>
-    # Input the count table and load the edgeR library.<br>
-    data <- read.csv(file = “counts.csv”)<br>
-    library(edgeR)<br>
-    # Define counts and groups. My counts table has repeat name in the first column so I remove that from counts object and make it the rownames.<br>
-    counts <- data[, -1 ]<br>
-    rownames(counts) <- data[,1]<br>
-    # Build a meta data object. I am comparing young, old, and veryold mice. I manually input the total mapping reads for each sample.<br>
-    meta <- data.frame(<br>
-    row.names=colnames(counts),<br>
-    condition=c(“young”,”young”,”young”,”old”,”old”,”old”,”veryold”,”veryold”,”veryold”),<br>
-    libsize=c(24923593,28340805,21743712,16385707,26573335,28131649,34751164,37371774,28236419))<br>
-    # Define the library size and conditions for the GLM<br>
-    libsize <- meta$libsize<br>
-    condition <- factor(meta$condition)<br>
-    design <- model.matrix(~0+condition)<br>
-    colnames(design) <- levels(meta$condition)<br>
-    # Build a DGE object for the GLM<br>
-    y <- DGEList(counts=counts, lib.size=libsize)<br>
-    # Normalize the data<br>
-    y <- calcNormFactors(y)<br>
-    # Estimate the variance<br>
-    y <- estimateGLMCommonDisp(y, design)<br>
-    y <- estimateGLMTrendedDisp(y, design)<br>
-    y <- estimateGLMTagwiseDisp(y, design)<br>
-    # Build an object to contain the normalized read abundance<br>
-    logcpm = cpm(y, log=TRUE, lib.size=libsize)<br>
-    logcpm = as.data.frame(logcpm)<br>
-    colnames(logcpm) = factor(meta$condition)<br>
-    # Conduct fitting of the GLM<br>
-    yfit <- glmFit(y, design)<br>
-    # Initialize result matrices to contain the results of the GLM<br>
-    results = matrix(nrow=dim(counts)[1],ncol=0)<br>
-    logfc = matrix(nrow=dim(counts)[1],ncol=0)<br>
-    # Make the comparisons for the GLM<br>
-    my.contrasts <- makeContrasts(<br>
-    veryold_old = veryold – old,<br>
-    veryold_young = veryold – young,<br>
-    old_young = old – young ,<br>
-    levels=design)<br>
-    # Define the contrasts used in the comparisons<br>
-    allcontrasts = c(<br>
-    “veryold_old” ,<br>
-    “veryold_young” ,<br>
-    “old_young”<br>
-    )<br>
-    # Conduct a for loop that will do the fitting of the GLM for each comparison<br>
-    # Put the results into the results objects<br>
-    for(current_contrast in allcontrasts) {<br>
-    lrt <- glmLRT(yfit, contrast=my.contrasts[,current_contrast])<br>
-    res <- topTags(lrt,n=dim(c)[1],sort.by=”none”)$table<br>
-    colnames(res) <- paste(colnames(res),current_contrast,sep=”.”)<br>
-    results <-cbind(results,res[,c(1,5)])<br>
-    logfc <-cbind(logfc,res[c(1)])<br>
-    }<br>
+## Example Script for EdgeR differential enrichment analysis
+    # EdgeR example
+    # Input the count table and load the edgeR library.
+    data <- read.csv(file = “counts.csv”)
+    library(edgeR)
+    # Define counts and groups. My counts table has repeat name in the first column so I remove that from counts object and make it the rownames.
+    counts <- data[, -1 ]
+    rownames(counts) <- data[,1]
+    # Build a meta data object. I am comparing young, old, and veryold mice. I manually input the total mapping reads for each sample.
+    meta <- data.frame(
+    row.names=colnames(counts),
+    condition=c(“young”,”young”,”young”,”old”,”old”,”old”,”veryold”,”veryold”,”veryold”),
+    libsize=c(24923593,28340805,21743712,16385707,26573335,28131649,34751164,37371774,28236419))
+    # Define the library size and conditions for the GLM
+    libsize <- meta$libsize
+    condition <- factor(meta$condition)
+    design <- model.matrix(~0+condition)
+    colnames(design) <- levels(meta$condition)
+    # Build a DGE object for the GLM
+    y <- DGEList(counts=counts, lib.size=libsize)
+    # Normalize the data
+    y <- calcNormFactors(y)
+    # Estimate the variance
+    y <- estimateGLMCommonDisp(y, design)
+    y <- estimateGLMTrendedDisp(y, design)
+    y <- estimateGLMTagwiseDisp(y, design)
+    # Build an object to contain the normalized read abundance
+    logcpm = cpm(y, log=TRUE, lib.size=libsize)
+    logcpm = as.data.frame(logcpm)
+    colnames(logcpm) = factor(meta$condition)
+    # Conduct fitting of the GLM
+    yfit <- glmFit(y, design)
+    # Initialize result matrices to contain the results of the GLM
+    results = matrix(nrow=dim(counts)[1],ncol=0)
+    logfc = matrix(nrow=dim(counts)[1],ncol=0)
+    # Make the comparisons for the GLM
+    my.contrasts <- makeContrasts(
+    veryold_old = veryold – old,
+    veryold_young = veryold – young,
+    old_young = old – young ,
+    levels=design)
+    # Define the contrasts used in the comparisons
+    allcontrasts = c(
+    “veryold_old” ,
+    “veryold_young” ,
+    “old_young”
+    )
+    # Conduct a for loop that will do the fitting of the GLM for each comparison
+    # Put the results into the results objects
+    for(current_contrast in allcontrasts) {
+    lrt <- glmLRT(yfit, contrast=my.contrasts[,current_contrast])
+    res <- topTags(lrt,n=dim(c)[1],sort.by=”none”)$table
+    colnames(res) <- paste(colnames(res),current_contrast,sep=”.”)
+    results <-cbind(results,res[,c(1,5)])
+    logfc <-cbind(logfc,res[c(1)])
+    }
 
 
 ----------
