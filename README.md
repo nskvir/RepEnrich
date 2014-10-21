@@ -5,7 +5,9 @@ Email: [steven_criscione@brown.edu](mailto:steven_criscione@brown.edu)
 ### Dependencies
 This example is for mouse genome **mm9**. Before
 getting started you should make sure you have installed the dependencies
-for RepEnrich. RepEnrich requires: bowtie1, bedtools, and samtools.
+for RepEnrich. RepEnrich requires: [Bowtie 1](http://bowtie-bio.sourceforge.net/index.shtml),
+[bedtools](http://bedtools.readthedocs.org/en/latest/), 
+and [samtools](http://www.htslib.org/).
 RepEnrich also requires a bowtie1 indexed genome in fasta format
 available. (Example `mm9.fa`) 
 
@@ -13,9 +15,8 @@ available. (Example `mm9.fa`)
 ### Step 1) Attain repetitive element annotation
 The RepEnrich setup script will build the annotation
 required by RepEnrich. The default is a repeatmasker file which can be
-downloaded from [repeatmasker.org]([http://www.repeatmasker.org) at
-[http://www.repeatmasker.org/genomes/mm9/RepeatMasker-rm328-db20090604/mm9.fa.out.gz](http://www.repeatmasker.org/genomes/mm9/RepeatMasker-rm328-db20090604/mm9.fa.out.gz).
-Once you have downloaded the file you can unzip it and rename it.
+downloaded from [repeatmasker.org](http://www.repeatmasker.org/genomes/mm9/RepeatMasker-rm328-db20090604/mm9.fa.out.gz).
+Once you have downloaded the file you can unzip it and rename it:
 
     gunzip mm9.fa.out.gz
     mv mm9.fa.out mm9_repeatmasker.txt
@@ -23,25 +24,25 @@ Once you have downloaded the file you can unzip it and rename it.
 This is what the file looks like:
 
 	SW perc perc perc query position in query matching repeat position in repeat score div. del. ins. sequence begin end (left) repeat class/family begin end  (left) ID
-	687 17.4 0.0 0.0 chr1 3000002 3000156 (194195276) C L1\_Mur2 LINE/L1 (4310) 1567 1413 1
-	917 21.4 11.4 4.5 chr1 3000238 3000733 (194194699) C L1\_Mur2 LINE/L1 (4488) 1389 913 1
-	845 23.3 7.6 11.4 chr1 3000767 3000792 (194194640) C L1\_Mur2 LINE/L1 (6816) 912 887 1
+	687 17.4 0.0 0.0 chr1 3000002 3000156 (194195276) C L1_Mur2 LINE/L1 (4310) 1567 1413 1
+	917 21.4 11.4 4.5 chr1 3000238 3000733 (194194699) C L1_Mur2 LINE/L1 (4488) 1389 913 1
+	845 23.3 7.6 11.4 chr1 3000767 3000792 (194194640) C L1_Mur2 LINE/L1 (6816) 912 887 1
 	621 25.0 6.5 3.7 chr1 3001288 3001583 (194193849) C Lx9 LINE/L1 (1596) 6048 5742 3
 
 The RepEnrich setup script will also allow
 you to build the annotation required by RepEnrich for a custom set of
 elements using a bed file. So if you want to examine mm9 LTR repetitive
 elements; you can build this file using the the repeatmasker track from
-UCSC genome table browser at
-[http://genome.ucsc.edu/cgi-bin/hgTables](http://genome.ucsc.edu/cgi-bin/hgTables).
-To do so, you would want to select genome mm9, click the edit box next
-to filter, fill in the repclass does match with "LTR", then click
-submit, back at the table browser select option "selected fields from
-primary and related tables", name the output file something like
-`mm9_LTR_repeatmasker.bed`, and click get output. On the next page
-select `genoName`, `genoStart`, `genoEnd`, `repName`, `repClass`, `repFamily` then
-download the file. The UCSC puts a header on the file that can be
-removed.
+[UCSC genome table browser](http://genome.ucsc.edu/cgi-bin/hgTables).
+
+To do this, select genome `mm9`, click the edit box next to _Filter_, fill
+in the repclass does match with `LTR`, then click submit. Back at the table
+browser select option `Selected fields from primary and related tables`, 
+name the output file something like `mm9_LTR_repeatmasker.bed`, and click
+`Get output`. On the next page select `genoName`, `genoStart`, `genoEnd`,
+`repName`, `repClass`, `repFamily` then download the file.
+
+The UCSC puts a header on the file that needs to be removed: 
 
     tail -n +3 mm9_LTR_repeatmasker.bed | head -n -4 > mm9_LTR_repeatmasker_fix.bed
     mv mm9_LTR_repeatmasker_fix.bed mm9_LTR_repeatmasker.bed
@@ -52,21 +53,20 @@ This is what our custom mm9 LTR retrotransposon bed file looks like:
 
 	chr1 3001722 3002005 RLTR25A LTR ERVK
 	chr1 3002051 3002615 RLTR25A LTR ERVK
-	chr1 3016886 3017193 RLTRETN\_Mm LTR ERVK
+	chr1 3016886 3017193 RLTRETN_Mm LTR ERVK
 	chr1 3018338 3018653 RLTR14 LTR ERV1
 
-Note: The format is
-important to get accurate information on repeat name, class, and family.
+Note: It is important to get the column format right: 
 
-* Column 1: chromosome
-* Column 2: start
-* Column 3: end
-* Column 4: class
-* Column 5: family
+* Column 1: Chromosome
+* Column 2: Start
+* Column 3: End
+* Column 4: Class
+* Column 5: Family
 
-The file should be tab delimited. If there is no
-information on class or family, you can replace these columns with the
-repeat name or an arbitrary label such as `group1`. 
+The file should be tab delimited. If there is no information on class
+or family, you can replace these columns with the repeat name or an
+arbitrary label such as `group1`.
 
 ### Step 2) Run the setup for RepEnrich
 
@@ -79,8 +79,7 @@ programs are available in your `PATH`).
     module load bedtools
     module load samtools
 
-Next run the setup using the type of annotation you have selected:
-default:
+Next run the setup using the type of annotation you have selected (default):
 
     python RepEnrich_setup.py /data/mm9_repeatmasker.txt /data/mm9.fa /data/setup_folder_mm9
 
@@ -128,12 +127,12 @@ The Sam file should be converted to a bam file with samtools:
     rm sampleA_unique.sam
 
 You should now compute the total mapping reads for your alignment. This
-includes the reads that mapped uniquely (in your `sampleA_unique.bam`)
-and more than once ( in your `sample_A_multimap.fastq`). The `.out` file
-from your bowtie batch script contains this information (or `stdout` from
-interactive bowtie running). 
+includes the reads that mapped uniquely (`sampleA_unique.bam`)
+and more than once (`sample_A_multimap.fastq`). The `.out` file
+from your bowtie batch script contains this information (or `stdout` 
+from an interactive job). 
 
-It looks like:
+It should looks like this:
 
 	Seeded quality full-index
 	search: 00:32:26
@@ -144,13 +143,14 @@ It looks like:
 	Reported 48299773 alignments to 1 output stream(s)
 
 The total mapping reads is the `# of reads processed` - 
-`# reads that failed to align`. Here our total mapping reads is: `92084909` - `17061693` = `75023216` 
+`# reads that failed to align`. Here our total mapping reads are:
+`92084909 - 17061693 = 75023216` 
 
 
 ### Step 4) Run RepEnrich on the data
 
-Now we have all the information we need to run RepEnrich. Here is an example: for default
-annotation:
+Now we have all the information we need to run RepEnrich.
+Here is an example (for default annotation):
 
     python RepEnrich.py /data/mm9_repeatmasker.txt /data/sample_A sample_A /data/hg19_setup_folder sampleA_multimap.fastq sampleA_unique.bam --cpus 16
 
@@ -172,7 +172,9 @@ An explanation of the RepEnrich command:
 		(--cpus 16)
 
 If you have paired-end data the command is very similar. There will be two `sampleA_multimap.fastq` and `sampleA_multimap_1.fastq` and
-`sampleA_multimap_2.fastq` from the bowtie step. The command for running
+`sampleA_multimap_2.fastq` from the bowtie step.
+
+The command for running
 RepEnrich in this case is (for default annotation):
 
     python RepEnrich.py /data/mm9_repeatmasker.txt /data/sample_A sample_A /data/hg19_setup_folder sampleA_multimap_1.fastq --fastqfile2 sampleA_multimap_2.fastq sampleA_unique.bam 75023216 --cpus 16 --pairedend TRUE
@@ -189,23 +191,23 @@ in the path `/data/sample_A`. This will include a few files. The most
 important of which is the `sampleA_fraction_counts.txt` file. This is
 the estimated counts for the repeats. I use this file to build a table
 of counts for all my conditions (by pasting the individual
-`*_fraction_counts.txt` files together for my complete experiment). You
-can use the compiled counts file to do differential expression analysis
+`*_fraction_counts.txt` files together for my complete experiment).
+
+You can use the compiled counts file to do differential expression analysis
 similar to what is done for genes. We use
- [EdgeR](http://www.bioconductor.org/packages/release/bioc/html/edgeR.html)
- or [DESEQ](http://bioconductor.org/packages/release/bioc/html/DESeq.html) to do the
-differential expression analysis. These are R packages that you can
+[EdgeR](http://www.bioconductor.org/packages/release/bioc/html/edgeR.html)
+or [DESEQ](http://bioconductor.org/packages/release/bioc/html/DESeq.html)
+to do the differential expression analysis. These are R packages that you can
 download from [bioconductor](http://bioconductor.org/).
 
- When running the EdgeR differential
-expression analysis
+When running the EdgeR differential expression analysis
 you can follow the examples in the EdgeR manual. I manually input the
 library sizes (the total mapping reads we obtained in the tutorial).
 Some of the downstream analysis, though, is left to your discretion.
 There are multiple ways you can do the differential expression analysis.
-I use the GLM method within the EdgeR packgage, although DESeq has
+I use the `GLM` method within the EdgeR packgage, although DESeq has
 similar methods and EdgeR also has a more straightforward approach
-called exactTest. Below is a sample EdgeR script used to do the
+called `exactTest`. Below is a sample EdgeR script used to do the
 differential analysis of repeats for young, old, and very old mice. The
 file `counts.csv` contains the ouput from RepEnrich that was made by
 pasting the individual `*_fraction_counts.txt` files together for my
