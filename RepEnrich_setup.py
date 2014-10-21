@@ -19,7 +19,7 @@ genomefasta = args.genomefasta
 setup_folder = args.setup_folder
 nfragmentsfile1 = args.nfragmentsfile1
 is_bed = args.is_bed
-######################################################################################
+################################################################################
 #Define a text importer
 import csv
 import sys
@@ -34,7 +34,7 @@ import os
 if not os.path.exists(setup_folder):
 	os.makedirs(setup_folder)
 
-#######################################################################################
+################################################################################
 # load genome into dictionary
 print "loading genome..."
 from Bio import SeqIO
@@ -59,7 +59,8 @@ for chr in allchrs:
     k = k + 1
 del g
 
-#########################################################################################Build a bedfile of repeatcoordinates to use by RepEnrich region_sorter
+################################################################################
+#Build a bedfile of repeatcoordinates to use by RepEnrich region_sorter
 if is_bed == "FALSE":
 	repeat_elements= []
 	fout = open(setup_folder + '/repnames.bed', 'w')
@@ -128,7 +129,7 @@ for repeat in repeat_elements:
     print >> fout, str(repeat) + '\t' + str(x)
     x +=1
 fout.close()
-########################################################################################
+################################################################################
 # generate spacer for psuedogenomes
 spacer = ""
 for i in range(gapl):
@@ -154,10 +155,15 @@ for repname in rep_chr.keys():
     rep_end_current = rep_end[repname]
     print "-------> " + str(len(rep_chr[repname])) + " fragments"
     for i in range(len(rep_chr[repname])):
-        chr = rep_chr_current[i]
-        rstart = max(rep_start_current[i] - flankingl, 0)
-        rend = min(rep_end_current[i] + flankingl, lgenome[chr]-1)
-        metagenome = metagenome + spacer + genome[chr][rstart:(rend+1)]
+        try:
+            chr = rep_chr_current[i]
+            rstart = max(rep_start_current[i] - flankingl, 0)
+            rend = min(rep_end_current[i] + flankingl, lgenome[chr]-1)
+            metagenome = metagenome + spacer + genome[chr][rstart:(rend+1)]
+        except KeyError:
+            print "Unrecognised Chromosome: "+chr
+            pass
+    
 	# Convert metagenome to SeqRecord object (required by SeqIO.write)
     record = SeqRecord(Seq(metagenome, IUPAC.unambiguous_dna), id = "repname", name = "", description = "")
     print "saving repgenome " + newname + ".fa" + " (" + str(k) + " of " + str(nrepgenomes) + ")"
