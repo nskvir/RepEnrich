@@ -10,12 +10,18 @@ for RepEnrich. RepEnrich requires: [Bowtie 1](http://bowtie-bio.sourceforge.net/
 and [samtools](http://www.htslib.org/).
 RepEnrich also requires a bowtie1 indexed genome in fasta format
 available. (Example `mm9.fa`) 
+The RepEnrich python scripts also use [BioPython](http://biopython.org) which
+can be installed with the following command:
+
+    pip install BioPython
 
 
 ### Step 1) Attain repetitive element annotation
 The RepEnrich setup script will build the annotation
 required by RepEnrich. The default is a repeatmasker file which can be
-downloaded from [repeatmasker.org](http://www.repeatmasker.org/genomes/mm9/RepeatMasker-rm328-db20090604/mm9.fa.out.gz).
+downloaded from [repeatmasker.org](http://www.repeatmasker.org/genomicDatasets/RMGenomicDatasets.html),
+(for instance, find the `mm9.fa.out.gz` download
+[here](http://www.repeatmasker.org/genomes/mm9/RepeatMasker-rm328-db20090604/mm9.fa.out.gz).
 Once you have downloaded the file you can unzip it and rename it:
 
     gunzip mm9.fa.out.gz
