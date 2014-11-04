@@ -183,11 +183,11 @@ If you have paired-end data the command is very similar. There will be two `samp
 The command for running
 RepEnrich in this case is (for default annotation):
 
-    python RepEnrich.py /data/mm9_repeatmasker.txt /data/sample_A sample_A /data/hg19_setup_folder sampleA_multimap_1.fastq --fastqfile2 sampleA_multimap_2.fastq sampleA_unique.bam 75023216 --cpus 16 --pairedend TRUE
+    python RepEnrich.py /data/mm9_repeatmasker.txt /data/sample_A sample_A /data/hg19_setup_folder sampleA_multimap_1.fastq --fastqfile2 sampleA_multimap_2.fastq sampleA_unique.bam --cpus 16 --pairedend TRUE
 
 for custom bed file annotation:
 
-    python RepEnrich.py /data/mm9_LTR_repeatmasker.bed /data/sample_A sample_A /data/hg19_setup_folder sampleA_multimap_1.fastq --fastqfile2 sampleA_multimap_2.fastq sampleA_unique.bam 75023216 --is_bed TRUE --cpus 16 --pairedend TRUE
+    python RepEnrich.py /data/mm9_LTR_repeatmasker.bed /data/sample_A sample_A /data/hg19_setup_folder sampleA_multimap_1.fastq --fastqfile2 sampleA_multimap_2.fastq sampleA_unique.bam --is_bed TRUE --cpus 16 --pairedend TRUE
 
 
 ### Step 5) Processing the output of RepEnrich
@@ -221,76 +221,77 @@ complete experiment.
 
 ## Example Script for EdgeR differential enrichment analysis
 
-    # EdgeR example
-    # Input the count table and load the edgeR library.
-    data <- read.csv(file = “counts.csv”)
-    library(edgeR)
-    
-	# Define counts and groups. My counts table has repeat name in the first column so I remove that from counts object and make it the rownames.
-    counts <- data[, -1 ]
-    rownames(counts) <- data[,1]
-    
-	# Build a meta data object. I am comparing young, old, and veryold mice. I manually input the total mapping reads for each sample.
-    meta <- data.frame(
-    	row.names=colnames(counts),
-    	condition=c(“young”,”young”,”young”,”old”,”old”,”old”,”veryold”,”veryold”,”veryold”),
-    	libsize=c(24923593,28340805,21743712,16385707,26573335,28131649,34751164,37371774,28236419)
-	)
-    
-	# Define the library size and conditions for the GLM
-    libsize <- meta$libsize
-    condition <- factor(meta$condition)
-    design <- model.matrix(~0+condition)
-    colnames(design) <- levels(meta$condition)
-    
-	# Build a DGE object for the GLM
-    y <- DGEList(counts=counts, lib.size=libsize)
-   
-    # Normalize the data
-    y <- calcNormFactors(y)
-    
-	# Estimate the variance
-    y <- estimateGLMCommonDisp(y, design)
-    y <- estimateGLMTrendedDisp(y, design)
-    y <- estimateGLMTagwiseDisp(y, design)
-    
-	# Build an object to contain the normalized read abundance
-    logcpm = cpm(y, log=TRUE, lib.size=libsize)
-    logcpm = as.data.frame(logcpm)
-    colnames(logcpm) = factor(meta$condition)
-    
-	# Conduct fitting of the GLM
-    yfit <- glmFit(y, design)
-    
-	# Initialize result matrices to contain the results of the GLM
-    results = matrix(nrow=dim(counts)[1],ncol=0)
-    logfc = matrix(nrow=dim(counts)[1],ncol=0)
-    
-	# Make the comparisons for the GLM
-    my.contrasts <- makeContrasts(
-    	veryold_old = veryold – old,
-    	veryold_young = veryold – young,
-    	old_young = old – young,
-    	levels=design
-	)
-    
-	# Define the contrasts used in the comparisons
-    allcontrasts = c(
-    	“veryold_old”,
-    	“veryold_young”,
-    	“old_young”
-    )
-    
-	# Conduct a for loop that will do the fitting of the GLM for each comparison
-    # Put the results into the results objects
-    for(current_contrast in allcontrasts) {
-    	lrt <- glmLRT(yfit, contrast=my.contrasts[,current_contrast])
-    	res <- topTags(lrt,n=dim(c)[1],sort.by=”none”)$table
-    	colnames(res) <- paste(colnames(res),current_contrast,sep=”.”)
-    	results <- cbind(results,res[,c(1,5)])
-    	logfc <- cbind(logfc,res[c(1)])
-    }
+```r
+# EdgeR example
+# Input the count table and load the edgeR library.
+data <- read.csv(file = “counts.csv”)
+library(edgeR)
 
+# Define counts and groups. My counts table has repeat name in the first column so I remove that from counts object and make it the rownames.
+counts <- data[, -1 ]
+rownames(counts) <- data[,1]
+
+# Build a meta data object. I am comparing young, old, and veryold mice. I manually input the total mapping reads for each sample.
+meta <- data.frame(
+	row.names=colnames(counts),
+	condition=c(“young”,”young”,”young”,”old”,”old”,”old”,”veryold”,”veryold”,”veryold”),
+	libsize=c(24923593,28340805,21743712,16385707,26573335,28131649,34751164,37371774,28236419)
+)
+
+# Define the library size and conditions for the GLM
+libsize <- meta$libsize
+condition <- factor(meta$condition)
+design <- model.matrix(~0+condition)
+colnames(design) <- levels(meta$condition)
+
+# Build a DGE object for the GLM
+y <- DGEList(counts=counts, lib.size=libsize)
+
+# Normalize the data
+y <- calcNormFactors(y)
+
+# Estimate the variance
+y <- estimateGLMCommonDisp(y, design)
+y <- estimateGLMTrendedDisp(y, design)
+y <- estimateGLMTagwiseDisp(y, design)
+
+# Build an object to contain the normalized read abundance
+logcpm = cpm(y, log=TRUE, lib.size=libsize)
+logcpm = as.data.frame(logcpm)
+colnames(logcpm) = factor(meta$condition)
+
+# Conduct fitting of the GLM
+yfit <- glmFit(y, design)
+
+# Initialize result matrices to contain the results of the GLM
+results = matrix(nrow=dim(counts)[1],ncol=0)
+logfc = matrix(nrow=dim(counts)[1],ncol=0)
+
+# Make the comparisons for the GLM
+my.contrasts <- makeContrasts(
+	veryold_old = veryold – old,
+	veryold_young = veryold – young,
+	old_young = old – young,
+	levels=design
+)
+
+# Define the contrasts used in the comparisons
+allcontrasts = c(
+	“veryold_old”,
+	“veryold_young”,
+	“old_young”
+)
+
+# Conduct a for loop that will do the fitting of the GLM for each comparison
+# Put the results into the results objects
+for(current_contrast in allcontrasts) {
+	lrt <- glmLRT(yfit, contrast=my.contrasts[,current_contrast])
+	res <- topTags(lrt,n=dim(c)[1],sort.by=”none”)$table
+	colnames(res) <- paste(colnames(res),current_contrast,sep=”.”)
+	results <- cbind(results,res[,c(1,5)])
+	logfc <- cbind(logfc,res[c(1)])
+}
+```
 
 
 Note the objects `logfc` contains the differential expression for the contrast, `logcpm` contains the normalized read abundance, and `result` contains both the differential expression and the false discovery rate for the experimental comparison. I recommended reading more about these in the EdgeR manual.
