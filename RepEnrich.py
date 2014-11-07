@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 import argparse
+import csv
+import numpy
 import os
+import shlex
+import shutil
+import subprocess
+import sys
 parser = argparse.ArgumentParser(description='Part II: Conducting the alignments to the psuedogenomes.  Before doing this step you will require 1) a bamfile of the unique alignments with index 2) a fastq file of the reads mapping to more than one location.  These files can be obtained using the following bowtie options [EXAMPLE: bowtie -S -m 1 --max multimap.fastq mm9 mate1_reads.fastq]  Once you have the unique alignment bamfile and the reads mapping to more than one location in a fastq file you can run this step.  EXAMPLE: python master_output.py /users/nneretti/data/annotation/hg19/hg19_repeatmasker.txt /users/nneretti/datasets/repeatmapping/POL3/Pol3_human/HeLa_InputChIPseq_Rep1 HeLa_InputChIPseq_Rep1 /users/nneretti/data/annotation/hg19/setup_folder HeLa_InputChIPseq_Rep1_multimap.fastq HeLa_InputChIPseq_Rep1.bam')
 parser.add_argument('--version', action='version', version='%(prog)s 0.1')
 parser.add_argument('annotation_file', action= 'store', metavar='annotation_file', help='List RepeatMasker.org annotation file for your organism.  The file may be downloaded from the RepeatMasker.org website.  Example: /data/annotation/hg19/hg19_repeatmasker.txt')
@@ -38,10 +44,17 @@ allcountmethod = args.allcountmethod
 is_bed = args.is_bed
 
 ################################################################################
+# check that the programs we need are available
+try:
+    subprocess.call(shlex.split("coverageBed -h"), stdout=open(os.devnull, 'wb'))
+    subprocess.call(shlex.split("bowtie --version"), stdout=open(os.devnull, 'wb'))
+except OSError:
+    print "Error: Bowtie or BEDTools not loaded"
+    raise
+
+################################################################################
 # define a csv reader that reads space deliminated files
 print 'Preparing for analysis using RepEnrich...'
-import csv
-import sys
 csv.field_size_limit(sys.maxsize)
 def import_text(filename, separator):
     for line in csv.reader(open(filename), delimiter=separator, 
@@ -115,9 +128,6 @@ for line in fin:
 fin.close()
 ################################################################################
 # map the repeats to the psuedogenomes:
-import subprocess
-import numpy
-import shlex
 if not os.path.exists(outputfolder):
 	os.mkdir(outputfolder)
 subprocess.call('module load bowtie',shell=True)
@@ -127,7 +137,7 @@ print 'Conducting region sorting on unique mapping reads....'
 fileout= outputfolder + os.path.sep + outputfile_prefix + '_regionsorter.txt'
 with open(fileout, 'w') as stdout:
    command = shlex.split("coverageBed -abam " +unique_mapper_bam+" -b " +setup_folder + os.path.sep + 'repnames.bed')
-   p = subprocess.Popen(command,stdout=stdout)
+   p = subprocess.Popen(command, stdout=stdout)
 p.communicate()
 stdout.close()
 filein = open(outputfolder + os.path.sep + outputfile_prefix + '_regionsorter.txt','r')
@@ -190,11 +200,11 @@ if paired_end == 'TRUE':
 		file2 = folder_pair2 + os.path.sep + metagenome + '.bowtie'
 		fileout= sorted_bowtie + os.path.sep + metagenome + '.bowtie'
 		with open(fileout, 'w') as stdout:
-			p1 = subprocess.Popen(['cat',file1,file2],stdout=PIPE)
-			p2 = subprocess.Popen(['cut', '-f1',"-d "], stdin=p1.stdout, stdout=PIPE)
-			p3 = subprocess.Popen(['cut', '-f1', "-d/"], stdin=p2.stdout, stdout=PIPE)
-			p4 = subprocess.Popen(['sort'],stdin=p3.stdout,stdout=PIPE)
-			p5 = subprocess.Popen(['uniq'],stdin=p4.stdout,stdout=stdout)
+			p1 = subprocess.Popen(['cat',file1,file2], stdout = subprocess.PIPE)
+			p2 = subprocess.Popen(['cut', '-f1',"-d "], stdin = p1.stdout, stdout = subprocess.PIPE)
+			p3 = subprocess.Popen(['cut', '-f1', "-d/"], stdin = p2.stdout, stdout = subprocess.PIPE)
+			p4 = subprocess.Popen(['sort'], stdin=p3.stdout, stdout = subprocess.PIPE)
+			p5 = subprocess.Popen(['uniq'], stdin=p4.stdout, stdout = stdout)
 			p5.communicate()
 		stdout.close()
 	print 'completed ...'
@@ -235,11 +245,11 @@ if paired_end == 'FALSE':
 		file1 = folder_pair1 + os.path.sep + metagenome + '.bowtie'
 		fileout= sorted_bowtie + os.path.sep + metagenome + '.bowtie'
 		with open(fileout, 'w') as stdout:
-			p1 = subprocess.Popen(['cat',file1],stdout=PIPE)
-			p2 = subprocess.Popen(['cut', '-f1'], stdin=p1.stdout, stdout=PIPE)
-			p3 = subprocess.Popen(['cut', '-f1', "-d/"], stdin=p2.stdout, stdout=PIPE)
-			p4 = subprocess.Popen(['sort'],stdin=p3.stdout,stdout=PIPE)
-			p5 = subprocess.Popen(['uniq'],stdin=p4.stdout,stdout=stdout)
+			p1 = subprocess.Popen(['cat',file1], stdout = subprocess.PIPE)
+			p2 = subprocess.Popen(['cut', '-f1'], stdin = p1.stdout, stdout = subprocess.PIPE)
+			p3 = subprocess.Popen(['cut', '-f1', "-d/"], stdin = p2.stdout, stdout = subprocess.PIPE)
+			p4 = subprocess.Popen(['sort'], stdin = p3.stdout,stdout = subprocess.PIPE)
+			p5 = subprocess.Popen(['uniq'], stdin = p4.stdout,stdout = stdout)
 			p5.communicate()
 		stdout.close()
 	print 'completed ...'
@@ -366,10 +376,10 @@ else:
 if os.path.exists(outputfolder + os.path.sep + outputfile_prefix + '_regionsorter.txt'):
 	os.remove(outputfolder + os.path.sep + outputfile_prefix + '_regionsorter.txt')
 if os.path.exists(outputfolder + os.path.sep + 'pair1_bowtie'):
-	os.removedirs(outputfolder + os.path.sep + 'pair1_bowtie')
+	shutil.rmtree(outputfolder + os.path.sep + 'pair1_bowtie')
 if os.path.exists(outputfolder + os.path.sep + 'pair2_bowtie'):
-	os.removedirs(outputfolder + os.path.sep + 'pair2_bowtie')
+	shutil.rmtree(outputfolder + os.path.sep + 'pair2_bowtie')
 if os.path.exists(outputfolder + os.path.sep + 'sorted_bowtie'):
-	os.removedirs(outputfolder + os.path.sep + 'sorted_bowtie')
+	shutil.rmtree(outputfolder + os.path.sep + 'sorted_bowtie')
 
 print "... Done"

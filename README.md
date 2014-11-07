@@ -173,7 +173,6 @@ An explanation of the RepEnrich command:
 		<RepEnrich_setup_folder>
 		<multimapping_reads.fastq>
 		<unique_mapping_reads.bam>
-		<total_mapping_reads>
 		(--is_bed TRUE)
 		(--cpus 16)
 
@@ -224,7 +223,7 @@ complete experiment.
 ```r
 # EdgeR example
 # Input the count table and load the edgeR library.
-data <- read.csv(file = “counts.csv”)
+data <- read.csv(file = "counts.csv")
 library(edgeR)
 
 # Define counts and groups. My counts table has repeat name in the first column so I remove that from counts object and make it the rownames.
@@ -234,7 +233,7 @@ rownames(counts) <- data[,1]
 # Build a meta data object. I am comparing young, old, and veryold mice. I manually input the total mapping reads for each sample.
 meta <- data.frame(
 	row.names=colnames(counts),
-	condition=c(“young”,”young”,”young”,”old”,”old”,”old”,”veryold”,”veryold”,”veryold”),
+	condition=c("young","young","young","old","old","old","veryold","veryold","veryold"),
 	libsize=c(24923593,28340805,21743712,16385707,26573335,28131649,34751164,37371774,28236419)
 )
 
@@ -277,22 +276,23 @@ my.contrasts <- makeContrasts(
 
 # Define the contrasts used in the comparisons
 allcontrasts = c(
-	“veryold_old”,
-	“veryold_young”,
-	“old_young”
+	"veryold_old",
+	"veryold_young",
+	"old_young"
 )
 
 # Conduct a for loop that will do the fitting of the GLM for each comparison
 # Put the results into the results objects
 for(current_contrast in allcontrasts) {
 	lrt <- glmLRT(yfit, contrast=my.contrasts[,current_contrast])
-	res <- topTags(lrt,n=dim(c)[1],sort.by=”none”)$table
-	colnames(res) <- paste(colnames(res),current_contrast,sep=”.”)
+	res <- topTags(lrt,n=dim(c)[1],sort.by="none")$table
+	colnames(res) <- paste(colnames(res),current_contrast,sep=".")
 	results <- cbind(results,res[,c(1,5)])
 	logfc <- cbind(logfc,res[c(1)])
 }
 ```
 
 
-Note the objects `logfc` contains the differential expression for the contrast, `logcpm` contains the normalized read abundance, and `result` contains both the differential expression and the false discovery rate for the experimental comparison. I recommended reading more about these in the EdgeR manual.
+Note the objects `logfc` contains the differential expression for the contrast, `logcpm` contains the normalized read abundance, and `result` contains both the differential expression and the false discovery rate for the experimental comparison. I recommended reading more about these in the
+[EdgeR manual](http://www.bioconductor.org/packages/release/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf).
 

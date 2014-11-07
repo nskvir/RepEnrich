@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 import argparse
+import csv
 import os
+import shlex
+import subprocess
+import sys
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
 
 parser = argparse.ArgumentParser(description='Part I: Prepartion of repetive element psuedogenomes and repetive element bamfiles.  This script prepares the annotation used by downstream applications to analyze for repetitive element enrichment. For this script to run properly bowtie must be loaded.  The repeat element psuedogenomes are prepared in order to analyze reads that map to multiple locations of the genome.  The repeat element bamfiles are prepared in order to use a region sorter to analyze reads that map to a single location of the genome.You will 1) annotation_file: The repetitive element annotation file downloaded from RepeatMasker.org database for your organism of interest. 2) genomefasta: Your genome of interest in fasta format, 3)setup_folder: a folder to contain repeat element setup files  command-line usage EXAMPLE: python master_setup.py /users/nneretti/data/annotation/mm9/mm9_repeatmasker.txt /users/nneretti/data/annotation/mm9/mm9.fa /users/nneretti/data/annotation/mm9/setup_folder', prog='getargs_genome_maker.py')
 parser.add_argument('--version', action='version', version='%(prog)s 0.1')
@@ -23,9 +31,15 @@ nfragmentsfile1 = args.nfragmentsfile1
 is_bed = args.is_bed
 
 ################################################################################
+# check that the programs we need are available
+try:
+    subprocess.call(shlex.split("bowtie --version"), stdout=open(os.devnull, 'wb'))
+except OSError:
+    print "Error: Bowtie or BEDTools not loaded"
+    raise
+
+################################################################################
 # Define a text importer
-import csv
-import sys
 csv.field_size_limit(sys.maxsize)
 def import_text(filename, separator):
     for line in csv.reader(open(os.path.realpath(filename)), delimiter=separator, 
@@ -39,12 +53,6 @@ if not os.path.exists(setup_folder):
 ################################################################################
 # load genome into dictionary
 print "loading genome..."
-from Bio import SeqIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
-import subprocess
-import shlex
 g = SeqIO.to_dict(SeqIO.parse(genomefasta, "fasta"))
 
 print "Precomputing length of all chromosomes..."
