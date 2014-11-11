@@ -33,7 +33,7 @@ is_bed = args.is_bed
 ################################################################################
 # check that the programs we need are available
 try:
-    subprocess.call(shlex.split("bowtie --version"), stdout=open(os.devnull, 'wb'))
+    subprocess.call(shlex.split("bowtie --version"), stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
 except OSError:
     print "Error: Bowtie or BEDTools not loaded"
     raise
