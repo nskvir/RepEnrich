@@ -312,8 +312,8 @@ allcontrasts = c(
 # Put the results into the results objects
 for(current_contrast in allcontrasts) {
 	lrt <- glmLRT(yfit, contrast=my.contrasts[,current_contrast])
-  plotSmear(lrt, de.tags=rownames(y))
-  title(current_contrast)
+	plotSmear(lrt, de.tags=rownames(y))
+	title(current_contrast)
 	res <- topTags(lrt,n=dim(c)[1],sort.by="none")$table
 	colnames(res) <- paste(colnames(res),current_contrast,sep=".")
 	results <- cbind(results,res[,c(1,5)])
@@ -331,23 +331,21 @@ results <- results[with(results, order(-abs(logFC.old_young))), ]
 # Save the results
 write.table(results, 'results.txt', quote=FALSE, sep="\t")
 
-# Plot Fold Change for each Repeat Class
-# Sort by old_young median
-class_bymedian <- with(results, reorder(class, -results$logFC.old_young, median))
-# Get the axis limits
-old_young_bp <- boxplot(results$logFC.old_young ~ class_bymedian, data=results, plot=FALSE)
-veryold_young_bp <- boxplot(results$logFC.veryold_young ~ class_bymedian, data=results, plot=FALSE)
-miny = min(old_young_bp$stats, veryold_young_bp$stats)
-maxy = max(old_young_bp$stats, veryold_young_bp$stats)
-# Plot the logFC for each repeat sub-class
-par(mar=c(6,10,4,1))
-boxplot(results$logFC.old_young_bp ~ class_bymedian, data=results, outline=FALSE, horizontal=TRUE,
-        col=rgb(0,0,1,0.3), las=2, at=seq(2, nlevels(results$class)*3, 3), ylim=c(miny, maxy),
-        xlab="log(Fold Change)", main="Changes in Repeat Enrichment")
-boxplot(results$logFC.veryold_young_bp ~ class_bymedian, data=results, outline=FALSE, horizontal=TRUE,
-        col=rgb(1,0,0,0.3), las=2, at=seq(1, nlevels(results$class)*3, 3), names=NA, add=TRUE)
-abline(v=0)
-legend('topright', c('Young : Old', 'Young : Very Old'), fill=c(rgb(0,0,1,0.3), rgb(1,0,0,0.3)))
+# Plot Fold Changes for repeat classes and types
+for(current_contrast in allcontrasts) {
+  logFC <- results[, paste0("logFC.", current_contrast)]
+  # Plot the repeat classes
+  classes <- with(results, reorder(class, -logFC, median))
+  par(mar=c(6,10,4,1))
+  boxplot(logFC ~ classes, data=results, outline=FALSE, horizontal=TRUE,
+          las=2, xlab="log(Fold Change)", main=current_contrast)
+  abline(v=0)
+  # Plot the repeat types
+  types <- with(results, reorder(type, -logFC, median))
+  boxplot(logFC ~ types, data=results, outline=FALSE, horizontal=TRUE,
+          las=2, xlab="log(Fold Change)", main=current_contrast)
+  abline(v=0)
+}
 
 ```
 
