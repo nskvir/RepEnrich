@@ -253,8 +253,8 @@ counts <- data.frame(
 
 # Build a meta data object. I am comparing young, old, and veryold mice.
 # I manually input the total mapping reads for each sample.
-# The total mapping reads for each sample are calculated manually using
-# the bowtie mapping logs: # of reads processed - # reads that failed to align
+# The total mapping reads are calculated using the bowtie logs:
+# # of reads processed - # reads that failed to align
 meta <- data.frame(
 	row.names=colnames(counts),
 	condition=c("young","young","young","old","old","old","veryold","veryold","veryold"),
@@ -331,10 +331,30 @@ results <- results[with(results, order(-abs(logFC.old_young))), ]
 # Save the results
 write.table(results, 'results.txt', quote=FALSE, sep="\t")
 
+# Plot Fold Change for each Repeat Class
+# Sort by old_young median
+class_bymedian <- with(results, reorder(class, -results$logFC.old_young, median))
+# Get the axis limits
+old_young_bp <- boxplot(results$logFC.old_young ~ class_bymedian, data=results, plot=FALSE)
+veryold_young_bp <- boxplot(results$logFC.veryold_young ~ class_bymedian, data=results, plot=FALSE)
+miny = min(old_young_bp$stats, veryold_young_bp$stats)
+maxy = max(old_young_bp$stats, veryold_young_bp$stats)
+# Plot the logFC for each repeat sub-class
+par(mar=c(6,10,4,1))
+boxplot(results$logFC.old_young_bp ~ class_bymedian, data=results, outline=FALSE, horizontal=TRUE,
+        col=rgb(0,0,1,0.3), las=2, at=seq(2, nlevels(results$class)*3, 3), ylim=c(miny, maxy),
+        xlab="log(Fold Change)", main="Changes in Repeat Enrichment")
+boxplot(results$logFC.veryold_young_bp ~ class_bymedian, data=results, outline=FALSE, horizontal=TRUE,
+        col=rgb(1,0,0,0.3), las=2, at=seq(1, nlevels(results$class)*3, 3), names=NA, add=TRUE)
+abline(v=0)
+legend('topright', c('Young : Old', 'Young : Very Old'), fill=c(rgb(0,0,1,0.3), rgb(1,0,0,0.3)))
 
 ```
 
 
-Note the objects `logfc` contains the differential expression for the contrast, `logcpm` contains the normalized read abundance, and `result` contains both the differential expression and the false discovery rate for the experimental comparison. I recommended reading more about these in the
+Note that the objects `logfc` contains the differential expression for the
+contrast, `logcpm` contains the normalized read abundance, and `result`
+contains both the differential expression and the false discovery rate for
+the experimental comparison. I recommended reading more about these in the
 [EdgeR manual](http://www.bioconductor.org/packages/release/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf).
 
