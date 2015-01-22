@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 import argparse
+import csv
+import os
+import shlex
+import subprocess
+import sys
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
+
 parser = argparse.ArgumentParser(description='Part I: Prepartion of repetive element psuedogenomes and repetive element bamfiles.  This script prepares the annotation used by downstream applications to analyze for repetitive element enrichment. For this script to run properly bowtie must be loaded.  The repeat element psuedogenomes are prepared in order to analyze reads that map to multiple locations of the genome.  The repeat element bamfiles are prepared in order to use a region sorter to analyze reads that map to a single location of the genome.You will 1) annotation_file: The repetitive element annotation file downloaded from RepeatMasker.org database for your organism of interest. 2) genomefasta: Your genome of interest in fasta format, 3)setup_folder: a folder to contain repeat element setup files  command-line usage EXAMPLE: python master_setup.py /users/nneretti/data/annotation/mm9/mm9_repeatmasker.txt /users/nneretti/data/annotation/mm9/mm9.fa /users/nneretti/data/annotation/mm9/setup_folder', prog='getargs_genome_maker.py')
 parser.add_argument('--version', action='version', version='%(prog)s 0.1')
 parser.add_argument('annotation_file', action= 'store', metavar='annotation_file', help='List annotation file. The annotation file contains the repeat masker annotation for the genome of interest and may be downloaded at RepeatMasker.org  Example /data/annotation/mm9/mm9.fa.out')
@@ -19,30 +29,30 @@ genomefasta = args.genomefasta
 setup_folder = args.setup_folder
 nfragmentsfile1 = args.nfragmentsfile1
 is_bed = args.is_bed
-######################################################################################
-#Define a text importer
-import csv
-import sys
+
+################################################################################
+# check that the programs we need are available
+try:
+    subprocess.call(shlex.split("bowtie --version"), stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
+except OSError:
+    print "Error: Bowtie or BEDTools not loaded"
+    raise
+
+################################################################################
+# Define a text importer
 csv.field_size_limit(sys.maxsize)
 def import_text(filename, separator):
-    for line in csv.reader(open(filename), delimiter=separator, 
+    for line in csv.reader(open(os.path.realpath(filename)), delimiter=separator, 
                            skipinitialspace=True):
         if line:
             yield line
-#Make a setup folder
-import os
+# Make a setup folder
 if not os.path.exists(setup_folder):
 	os.makedirs(setup_folder)
 
-#######################################################################################
+################################################################################
 # load genome into dictionary
 print "loading genome..."
-from Bio import SeqIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
-import subprocess
-import shlex
 g = SeqIO.to_dict(SeqIO.parse(genomefasta, "fasta"))
 
 print "Precomputing length of all chromosomes..."
@@ -59,16 +69,17 @@ for chr in allchrs:
     k = k + 1
 del g
 
-#########################################################################################Build a bedfile of repeatcoordinates to use by RepEnrich region_sorter
+################################################################################
+# Build a bedfile of repeatcoordinates to use by RepEnrich region_sorter
 if is_bed == "FALSE":
 	repeat_elements= []
-	fout = open(setup_folder + '/repnames.bed', 'w')
+	fout = open(os.path.realpath(setup_folder + os.path.sep + 'repnames.bed'), 'w')
 	fin = import_text(annotation_file, ' ')
-	x =0
+	x = 0
 	rep_chr = {}
 	rep_start = {}
 	rep_end = {}
-	x =0
+	x = 0
 	for line in fin:
 	    if x>2:
 	        line9 = line[9].replace("(","_").replace(")","_").replace("/","_")
@@ -90,8 +101,8 @@ if is_bed == "FALSE":
 	    x +=1
 if is_bed == "TRUE":
 	repeat_elements= []
-	fout = open(setup_folder + '/repnames.bed', 'w')
-	fin = open(annotation_file, 'r')
+	fout = open(os.path.realpath(setup_folder + os.path.sep + 'repnames.bed'), 'w')
+	fin = open(os.path.realpath(annotation_file), 'r')
 	x =0
 	rep_chr = {}
 	rep_start = {}
@@ -122,13 +133,13 @@ fout.close()
 repeat_elements = sorted(repeat_elements)
 print "Writing a key for all repeats..."
 #print to fout the binary key that contains each repeat type with the associated binary number; sort the binary key:
-fout = open(setup_folder + '/' + 'repgenomes_key.txt', 'w')
+fout = open(os.path.realpath(setup_folder + os.path.sep + 'repgenomes_key.txt'), 'w')
 x = 0
 for repeat in repeat_elements:
     print >> fout, str(repeat) + '\t' + str(x)
     x +=1
 fout.close()
-########################################################################################
+################################################################################
 # generate spacer for psuedogenomes
 spacer = ""
 for i in range(gapl):
@@ -136,7 +147,7 @@ for i in range(gapl):
 
 # save file with number of fragments processed per repname
 print "Saving number of fragments processed per repname to " + nfragmentsfile1
-fout1 = open(nfragmentsfile1,"w")
+fout1 = open(os.path.realpath(nfragmentsfile1),"w")
 for repname in rep_chr.keys():
 	rep_chr_current = rep_chr[repname]
 	print >>fout1, str(len(rep_chr[repname])) + "\t" + repname
@@ -154,19 +165,23 @@ for repname in rep_chr.keys():
     rep_end_current = rep_end[repname]
     print "-------> " + str(len(rep_chr[repname])) + " fragments"
     for i in range(len(rep_chr[repname])):
-        chr = rep_chr_current[i]
-        rstart = max(rep_start_current[i] - flankingl, 0)
-        rend = min(rep_end_current[i] + flankingl, lgenome[chr]-1)
-        metagenome = metagenome + spacer + genome[chr][rstart:(rend+1)]
+        try:
+            chr = rep_chr_current[i]
+            rstart = max(rep_start_current[i] - flankingl, 0)
+            rend = min(rep_end_current[i] + flankingl, lgenome[chr]-1)
+            metagenome = metagenome + spacer + genome[chr][rstart:(rend+1)]
+        except KeyError:
+            print "Unrecognised Chromosome: "+chr
+            pass
+    
 	# Convert metagenome to SeqRecord object (required by SeqIO.write)
     record = SeqRecord(Seq(metagenome, IUPAC.unambiguous_dna), id = "repname", name = "", description = "")
     print "saving repgenome " + newname + ".fa" + " (" + str(k) + " of " + str(nrepgenomes) + ")"
-    fastafilename = setup_folder + '/' + newname + ".fa"
+    fastafilename = os.path.realpath(setup_folder + os.path.sep + newname + ".fa")
     SeqIO.write(record, fastafilename, "fasta")
     print "indexing repgenome " + newname + ".fa" + " (" + str(k) + " of " + str(nrepgenomes) + ")"
-    command = shlex.split('bowtie-build -f ' + fastafilename + ' ' + setup_folder + '/' + newname)
-    p = subprocess.Popen(command)
-    p.communicate()
+    command = shlex.split('bowtie-build -f ' + fastafilename + ' ' + setup_folder + os.path.sep + newname)
+    p = subprocess.Popen(command).communicate()
     k += 1
 
 print "... Done"
