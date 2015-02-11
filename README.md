@@ -5,7 +5,8 @@ Email: [steven_criscione@brown.edu](mailto:steven_criscione@brown.edu)
 ### Dependencies
 This example is for mouse genome **mm9**. Before
 getting started you should make sure you have installed the dependencies
-for RepEnrich. RepEnrich requires: [Bowtie 1](http://bowtie-bio.sourceforge.net/index.shtml),
+for RepEnrich. RepEnrich requires python version 2.7.3.
+RepEnrich requires: [Bowtie 1](http://bowtie-bio.sourceforge.net/index.shtml),
 [bedtools](http://bedtools.readthedocs.org/en/latest/), 
 and [samtools](http://www.htslib.org/).
 RepEnrich also requires a bowtie1 indexed genome in fasta format
