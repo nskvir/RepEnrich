@@ -229,11 +229,10 @@ source("http://bioconductor.org/biocLite.R")
 biocLite("edgeR")
 library('edgeR')
 
-# Input the count table and load the edgeR library.
-data <- read.csv(file = "counts.csv")
-library(edgeR)
+# In the case of a pre-assembled file of the fraction count output do the following:
+# counts <- read.csv(file = "counts.csv")
 
-#' Load the RepEnrich results - fraction counts
+# In the case of seperate outputs, load the RepEnrich results - fraction counts
 young_r1 <- read.delim('young_r1_fraction_counts.txt', header=FALSE)
 young_r2 <- read.delim('young_r2_fraction_counts.txt', header=FALSE)
 young_r3 <- read.delim('young_r3_fraction_counts.txt', header=FALSE)
