@@ -18,6 +18,13 @@ can be installed with the following command:
 
 
 ### Step 1) Attain repetitive element annotation
+I have temporarily provided the setup for the human genome (build hg19 and hg38) and the mouse genome (build mm9) available [here] (https://drive.google.com/folderview?id=0B1dD8MQRH4qZfmlxOGwtSXRnWDFaVldqbkExdXItZGpySm1mVmhlTVladThHWWhGMmxrLTQ&usp=sharing). After downloading you can extract the files using:
+
+    gunzip hg19_repeatmasker_clean.txt.gz
+    tar -zxvf RepEnrich_setup_hg19.tar.gz
+  
+To yield hg19_repeatmasker_clean.txt annotation file and RepEnrich_setup_hg19 setup folder.  The annotation files I am using are repeatmasker files with simple and low-complexity repeats removed (satellite repeats and transposons are still present).  If you choose to use these files for the set-up you can skip ahead to step 2.
+
 The RepEnrich setup script will build the annotation
 required by RepEnrich. The default is a repeatmasker file which can be
 downloaded from [repeatmasker.org](http://www.repeatmasker.org/genomicDatasets/RMGenomicDatasets.html),
