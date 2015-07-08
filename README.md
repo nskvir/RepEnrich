@@ -8,7 +8,7 @@ getting started you should make sure you have installed the dependencies
 for RepEnrich. RepEnrich requires python version 2.7.3.
 RepEnrich requires: [Bowtie 1](http://bowtie-bio.sourceforge.net/index.shtml),
 [bedtools](http://bedtools.readthedocs.org/en/latest/), 
-and [samtools](http://www.htslib.org/). I am using bedtools version 2.20.1, bowtie 1 version 0.12.9, samtools version 0.1.19. IMPORTANT: bedtools version 2.24.0 and greater yield an error due to altered functionality of [coverageBed](http://bedtools.readthedocs.org/en/latest/content/tools/coverage.html).
+and [samtools](http://www.htslib.org/). I am using bedtools version 2.20.1, bowtie 1 version 0.12.9, samtools version 0.1.19.
 RepEnrich also requires a bowtie1 indexed genome in fasta format
 available. (Example `mm9.fa`) 
 The RepEnrich python scripts also use [BioPython](http://biopython.org) which
@@ -16,6 +16,7 @@ can be installed with the following command:
 
     pip install BioPython
 
+IMPORTANT: bedtools version 2.24.0 and greater yield an error due to altered functionality of [coverageBed](http://bedtools.readthedocs.org/en/latest/content/tools/coverage.html).
 
 ### Step 1) Attain repetitive element annotation
 I have temporarily provided the setup for the human genome (build hg19 and hg38) and the mouse genome (build mm9) available [here] (https://drive.google.com/folderview?id=0B1dD8MQRH4qZfmlxOGwtSXRnWDFaVldqbkExdXItZGpySm1mVmhlTVladThHWWhGMmxrLTQ&usp=sharing). After downloading you can extract the files using:
