@@ -7,6 +7,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+
 parser = argparse.ArgumentParser(description='Part II: Conducting the alignments to the psuedogenomes.  Before doing this step you will require 1) a bamfile of the unique alignments with index 2) a fastq file of the reads mapping to more than one location.  These files can be obtained using the following bowtie options [EXAMPLE: bowtie -S -m 1 --max multimap.fastq mm9 mate1_reads.fastq]  Once you have the unique alignment bamfile and the reads mapping to more than one location in a fastq file you can run this step.  EXAMPLE: python master_output.py /users/nneretti/data/annotation/hg19/hg19_repeatmasker.txt /users/nneretti/datasets/repeatmapping/POL3/Pol3_human/HeLa_InputChIPseq_Rep1 HeLa_InputChIPseq_Rep1 /users/nneretti/data/annotation/hg19/setup_folder HeLa_InputChIPseq_Rep1_multimap.fastq HeLa_InputChIPseq_Rep1.bam')
 parser.add_argument('--version', action='version', version='%(prog)s 0.1')
 parser.add_argument('annotation_file', action= 'store', metavar='annotation_file', help='List RepeatMasker.org annotation file for your organism.  The file may be downloaded from the RepeatMasker.org website.  Example: /data/annotation/hg19/hg19_repeatmasker.txt')
@@ -37,7 +38,7 @@ fastqfile_2 = args.fastqfile2
 tolerance = args.tolerance
 threshold =  args.threshold
 cpus = args.cpus
-b_opt = "-k1 -p " +str(cpus) +" --quiet"
+b_opt = "-k1 -p " +str(1) +" --quiet"
 simple_repeat = args.collapserepeat
 paired_end = args.pairedend
 allcountmethod = args.allcountmethod
@@ -174,8 +175,10 @@ if paired_end == 'TRUE':
 			command = shlex.split("bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_2)
 			pp = subprocess.Popen(command,stdout=stdout)
 		ps.append(p)
+		ticker +=1
 		psb.append(pp)
-		if ticker == 25:
+		ticker +=1
+		if ticker == cpus:
 			for p in ps:
 				p.communicate()
 			for p in psb:
@@ -183,7 +186,6 @@ if paired_end == 'TRUE':
 			ticker = 0
 			psb =[]
 			ps = []
-		ticker +=1
 	if len(ps) > 0:
 		for p in ps:
 			p.communicate()
@@ -224,12 +226,12 @@ if paired_end == 'FALSE':
 			command = shlex.split("bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_1)
 			p = subprocess.Popen(command,stdout=stdout)
 		ps.append(p)
-		if ticker == 50:
+		ticker +=1
+		if ticker == cpus:
 			for p in ps:
 				p.communicate()
 			ticker = 0
 			ps = []
-		ticker +=1
 	if len(ps) > 0:
 		for p in ps:
 			p.communicate()
