@@ -76,9 +76,9 @@ Note: It is important to get the column format right:
 * Column 1: Chromosome
 * Column 2: Start
 * Column 3: End
-* Column 4: Class
-* Column 5: Family
-* Column 6: Sub-family
+* Column 4: Repeat_name
+* Column 5: Class
+* Column 6: Family
 
 The file should be tab delimited. If there is no information on class
 or family, you can replace these columns with the repeat name or an
