@@ -18,8 +18,6 @@ parser.add_argument('fastqfile', action= 'store', metavar='fastqfile', help='Ent
 parser.add_argument('alignment_bam', action= 'store', metavar='alignment_bam', help='Enter bamfile output for reads that map uniquely. Example /bamfiles/old.bam')
 parser.add_argument('--pairedend', action= 'store', dest='pairedend', default= 'FALSE', help='Designate this option for paired-end sequencing. Default FALSE change to TRUE')
 parser.add_argument('--collapserepeat', action= 'store', dest='collapserepeat', metavar='collapserepeat', default= 'Simple_repeat', help='Designate this option to generate a collapsed repeat type.  Uncollapsed output is generated in addition to collapsed repeat type.  Simple_repeat is default to simplify downstream analysis.  You can change the default to another repeat name to collapse a seperate specific repeat instead or if the name of Simple_repeat is different for your organism.  Default Simple_repeat')
-parser.add_argument('--threshold', action= 'store', dest='threshold', metavar='threshold', default= '21', type=int, help='This option specifies overlap between repetitive elements and reads that map uniquely to the genome.  You should change the option depending on the read length.  We felt that the the value should be close to half read length.  Default 21')
-parser.add_argument('--tolerance', action= 'store', dest='tolerance', metavar='tolerance', default= '500', type=int, help='This option helps to modifies the scrutiny of the region sorter.  Default 500')
 parser.add_argument('--fastqfile2', action= 'store', dest='fastqfile2', metavar='fastqfile2', default= 'none', help='Enter fastqfile2 when using paired-end option.  Default none')
 parser.add_argument('--cpus', action= 'store', dest='cpus', metavar='cpus', default= "1", type=int, help='Enter available cpus per node.  The more cpus the faster RepEnrich performs. RepEnrich is designed to only work on one node. Default: "1"')
 parser.add_argument('--allcountmethod', action= 'store', dest='allcountmethod', metavar='allcountmethod', default= "FALSE", help='By default the pipeline only outputs the fraction count method.  Consdidered to be the best way to count multimapped reads.  Changing this option will include the unique count method, a conservative count, and the total count method, a liberal counting strategy. Our evaluation of simulated data indicated fraction counting is best. Default = FALSE, change to TRUE')
@@ -35,8 +33,6 @@ repeat_bed = setup_folder + os.path.sep + 'repnames.bed'
 unique_mapper_bam = args.alignment_bam
 fastqfile_1 = args.fastqfile
 fastqfile_2 = args.fastqfile2
-tolerance = args.tolerance
-threshold =  args.threshold
 cpus = args.cpus
 b_opt = "-k1 -p " +str(1) +" --quiet"
 simple_repeat = args.collapserepeat
