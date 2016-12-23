@@ -7,6 +7,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(description='Part II: Conducting the alignments to the psuedogenomes.  Before doing this step you will require 1) a bamfile of the unique alignments with index 2) a fastq file of the reads mapping to more than one location.  These files can be obtained using the following bowtie options [EXAMPLE: bowtie -S -m 1 --max multimap.fastq mm9 mate1_reads.fastq]  Once you have the unique alignment bamfile and the reads mapping to more than one location in a fastq file you can run this step.  EXAMPLE: python master_output.py /users/nneretti/data/annotation/hg19/hg19_repeatmasker.txt /users/nneretti/datasets/repeatmapping/POL3/Pol3_human/HeLa_InputChIPseq_Rep1 HeLa_InputChIPseq_Rep1 /users/nneretti/data/annotation/hg19/setup_folder HeLa_InputChIPseq_Rep1_multimap.fastq HeLa_InputChIPseq_Rep1.bam')
 parser.add_argument('--version', action='version', version='%(prog)s 0.1')
@@ -127,7 +128,6 @@ fin.close()
 # map the repeats to the psuedogenomes:
 if not os.path.exists(outputfolder):
 	os.mkdir(outputfolder)
-subprocess.call('module load bowtie',shell=True)
 ################################################################################
 # Conduct the regions sorting
 print 'Conducting region sorting on unique mapping reads....'
@@ -147,45 +147,36 @@ for line in filein:
 	counts[str(repeat_key[line[3]])]+=int(line[4])
 	sumofrepeatreads+=int(line[4])
 print 'Identified ' + str(sumofrepeatreads) + 'unique reads that mapped to repeats.'
+
+def bowtie_run_paired(metagenome):
+	metagenomepath = os.path.join(setup_folder, metagenome)
+	folder_pair1 = os.path.join(outputfolder, 'pair1_bowtie')
+	folder_pair2 = os.path.join(outputfolder, 'pair2_bowtie')
+	file1 = os.path.join(folder_pair1,  '%s.bowtie' % metagenome)
+	file2 = os.path.join(folder_pair2,  '%s.bowtie' % metagenome)
+	b_opt = "-k1 -p " +str(1) +" --quiet"
+	print "calling: bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_1
+	with open(file1, 'w') as stdout:
+		command = shlex.split("bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_1)
+		p = subprocess.Popen(command,stdout=stdout)
+		p.communicate()
+	with open(file2, 'w') as stdout:
+		command = shlex.split("bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_2)
+		pp = subprocess.Popen(command,stdout=stdout)
+		pp.communicate()
+
 ################################################################################
 if paired_end == 'TRUE':
-	if not os.path.exists(outputfolder + os.path.sep + 'pair1_bowtie'):
-		os.mkdir(outputfolder + os.path.sep + 'pair1_bowtie')
-	if not os.path.exists(outputfolder + os.path.sep + 'pair2_bowtie'):
-		os.mkdir(outputfolder + os.path.sep + 'pair2_bowtie')
-	folder_pair1 = outputfolder + os.path.sep + 'pair1_bowtie'
-	folder_pair2 = outputfolder + os.path.sep + 'pair2_bowtie'
+	folder_pair1 = os.path.join(outputfolder, 'pair1_bowtie')
+	folder_pair2 = os.path.join(outputfolder, 'pair2_bowtie')
+	if not os.path.exists(folder_pair1):
+		os.mkdir(folder_pair1)
+	if not os.path.exists(folder_pair2):
+		os.mkdir(folder_pair2)
 ################################################################################
 	print "Processing repeat psuedogenomes..."
-	ps = []
-	psb= []
-	ticker= 0
-	for metagenome in repeat_list:
-   		metagenomepath = setup_folder + os.path.sep + metagenome
-		file1=folder_pair1 + os.path.sep + metagenome + '.bowtie'
-		file2 =folder_pair2 + os.path.sep + metagenome + '.bowtie'
-		with open(file1, 'w') as stdout:
-			command = shlex.split("bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_1)
-			p = subprocess.Popen(command,stdout=stdout)
-		with open(file2, 'w') as stdout:
-			command = shlex.split("bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_2)
-			pp = subprocess.Popen(command,stdout=stdout)
-		ps.append(p)
-		ticker +=1
-		psb.append(pp)
-		ticker +=1
-		if ticker == cpus:
-			for p in ps:
-				p.communicate()
-			for p in psb:
-				p.communicate()
-			ticker = 0
-			psb =[]
-			ps = []
-	if len(ps) > 0:
-		for p in ps:
-			p.communicate()
-	stdout.close()
+	ps_pool = Pool(processes=cpus)
+	ps_pool.map(bowtie_run_paired, repeat_list)
     
 ################################################################################
 # combine the output from both read pairs:
