@@ -155,7 +155,6 @@ def bowtie_run_paired(metagenome):
 	file1 = os.path.join(folder_pair1,  '%s.bowtie' % metagenome)
 	file2 = os.path.join(folder_pair2,  '%s.bowtie' % metagenome)
 	b_opt = "-k1 -p " +str(1) +" --quiet"
-	print "calling: bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_1
 	with open(file1, 'w') as stdout:
 		command = shlex.split("bowtie " + b_opt + " " + metagenomepath + " " + fastqfile_1)
 		p = subprocess.Popen(command,stdout=stdout)
