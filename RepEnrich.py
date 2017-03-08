@@ -127,7 +127,6 @@ fin.close()
 # map the repeats to the psuedogenomes:
 if not os.path.exists(outputfolder):
 	os.mkdir(outputfolder)
-subprocess.call('module load bowtie',shell=True)
 ################################################################################
 # Conduct the regions sorting
 print 'Conducting region sorting on unique mapping reads....'
