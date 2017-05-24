@@ -1,0 +1,21 @@
+   SW  perc perc perc  query      position in query           matching       repeat              position in  repeat
+score  div. del. ins.  sequence    begin     end    (left)    repeat         class/family         begin  end (left)   ID
+
+   16  20.2  5.9  0.0  chrM         1211    1261   (18263) +  (TTTTA)n       Simple_repeat            1   54    (0)  84486
+   13  23.9  2.2  2.2  chrM         2014    2059   (17465) +  (TTA)n         Simple_repeat            1   46    (0)  84487
+   24  18.8  5.3  2.6  chrM         3924    3999   (15525) +  (TAT)n         Simple_repeat            1   78    (0)  84488
+   18   4.5  0.0  0.0  chrM         5961    5983   (13541) +  (AT)n          Simple_repeat            1   23    (0)  84489
+   13  25.9  4.0  4.0  chrM         6247    6320   (13204) +  (ATTTAT)n      Simple_repeat            1   74    (0)  84490
+   11  14.6  7.5  2.4  chrM         8783    8822   (10702) +  (CTAATT)n      Simple_repeat            1   42    (0)  84491
+   17  19.0  0.0  8.6  chrM         9064    9126   (10398) +  A-rich         Low_complexity           1   58    (0)  84492
+   13  21.0  5.9  1.9  chrM        11723   11773    (7751) +  (ATA)n         Simple_repeat            1   53    (0)  84493
+   66  20.4 12.3 12.3  chrM        12823   13001    (6523) C  LSU-rRNA_Cel   rRNA                   (1) 2431   2253  84494
+   16  16.6  0.0  2.9  chrM        14361   14396    (5128) +  (ATT)n         Simple_repeat            1   35    (0)  84495
+   44   2.4  0.0  0.0  chrM        15966   16007    (3517) +  (TA)n          Simple_repeat            1   42    (0)  84496
+   35   5.3  0.0  0.0  chrM        16559   16597    (2927) +  (AT)n          Simple_repeat            1   39    (0)  84497
+   36   2.9  0.0  0.0  chrM        16922   16956    (2568) +  (AT)n          Simple_repeat            1   35    (0)  84498
+   37   0.0  0.0  0.0  chrM        17040   17071    (2453) +  (TA)n          Simple_repeat            1   32    (0)  84499
+   20   4.3  0.0  0.0  chrM        17417   17440    (2084) +  (T)n           Simple_repeat            1   24    (0)  84500
+   31   6.9  6.3  1.5  chrM        17451   17513    (2011) +  (TA)n          Simple_repeat            1   66    (0)  84501
+   26  17.0  0.0  0.0  chrM        19469   19514      (10) +  A-rich         Low_complexity           1   46    (0)  84502
+
