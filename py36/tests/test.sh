@@ -1,6 +1,7 @@
 #!/bin/bash
-# usage: bash tool_wrapper.sh Samp chrM
+# usage: bash tool_wrapper.sh
 
+echo "RUN bash install_conda_env.sh FIRST"
 input_base=$1
 baseReference=$2
 

@@ -8,3 +8,5 @@ echo "channels:" > ~/.condarc
 echo "  - bioconda" >> ~/.condarc
 echo "  - r" >> ~/.condarc
 echo "  - defaults" >> ~/.condarc
+. activate RepEnrich_py36_0
+
