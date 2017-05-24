@@ -2,8 +2,10 @@
 # usage: bash tool_wrapper.sh
 
 echo "RUN bash install_conda_env.sh FIRST"
-input_base=$1
-baseReference=$2
+export PATH=~/miniconda2/bin:$PATH
+. activate RepEnrich_py36_0
+input_base=Samp
+baseReference=chrM
 
 bowtie-build ${baseReference}.fa ${baseReference}
 
