@@ -1,3 +1,5 @@
+##There is currently a newer version of RepEnrich located here: https://github.com/nerettilab/RepEnrich2
+
 #RepEnrich
 ## Tutorial By Steven Criscione
 Email: [steven_criscione@brown.edu](mailto:steven_criscione@brown.edu)
