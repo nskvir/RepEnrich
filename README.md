@@ -21,7 +21,7 @@ can be installed with the following command:
 IMPORTANT: bedtools version 2.24.0 and greater yield an error due to altered functionality of [coverageBed](http://bedtools.readthedocs.org/en/latest/content/tools/coverage.html).
 
 ### Step 1) Attain repetitive element annotation
-I have temporarily provided the setup for the human genome (build hg19 and hg38) and the mouse genome (build mm9) available [here] (https://drive.google.com/folderview?id=0B1dD8MQRH4qZfmlxOGwtSXRnWDFaVldqbkExdXItZGpySm1mVmhlTVladThHWWhGMmxrLTQ&usp=sharing). After downloading you can extract the files using:
+After downloading you can extract the files using:
 
     gunzip hg19_repeatmasker_clean.txt.gz
     tar -zxvf RepEnrich_setup_hg19.tar.gz
